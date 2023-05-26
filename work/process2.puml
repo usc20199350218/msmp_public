@@ -1,0 +1,40 @@
+@startuml
+title 添加订单流程
+
+|客户端|
+start
+: 根据任职/角色判断权限;
+if (是否有权限) then (yes)
+  : 获取店铺列表;
+  : 选择店铺;
+'  if (药品信息齐全) then (yes)
+    : 进入添加订单页面;
+    : 添加药品;
+    : 提交初步订单;
+    |后端服务器|
+    : 创建订单;
+    : 准备确认;
+    if (是否支持支付方式) then (yes)
+      : 选择支付方式;
+      : 支付;
+      if (支付成功) then (yes)
+        : 检查状态;
+        if (状态正确) then (yes)
+          : 返回添加订单页面;
+'        else (no)
+'          : 显示错误信息;
+'        endif
+      else (no)
+        : 显示错误信息;
+      endif
+    else (no)
+      : 显示错误信息;
+    endif
+  else (no)
+    : 显示错误信息;
+  endif
+else (no)
+  : 显示错误信息;
+endif
+stop
+@enduml

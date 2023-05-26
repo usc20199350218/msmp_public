@@ -1,0 +1,64 @@
+@startuml
+left to right direction
+actor 管理员
+actor 用户
+rectangle 药店管理系统 {
+  rectangle 系统管理 {
+    usecase 管理菜单
+    usecase 管理人员
+    usecase 管理角色
+  }
+  rectangle 药品管理 {
+    usecase 管理药品品牌
+    usecase 管理药品基础资料
+    usecase 管理药品详情
+    usecase 管理药品品类
+  }
+  rectangle 库存管理 {
+    usecase 管理仓库批次
+  }
+  rectangle 店铺管理 {
+    usecase 管理店铺列表
+    usecase 管理店铺职员
+    usecase 管理店铺职位
+    usecase 管理店铺批次
+  }
+  rectangle 订单管理 {
+    usecase 管理订单
+  }
+  rectangle 随访管理 {
+    usecase 管理随访项
+    usecase 管理随访记录
+
+    usecase 管理在线销售
+    usecase 管理线下销售
+
+    usecase 线上购买
+    usecase 查看订单
+
+}
+管理员 --> 管理菜单
+管理员 --> 管理人员
+管理员 --> 管理角色
+管理员 --> 管理药品品牌
+管理员 --> 管理药品基础资料
+管理员 --> 管理药品详情
+管理员 --> 管理药品品类
+管理员 --> 管理仓库批次
+管理员 --> 管理店铺列表
+管理员 --> 管理店铺职员
+管理员 --> 管理店铺职位
+管理员 --> 管理店铺批次
+管理员 --> 管理订单
+管理员 --> 管理随访项
+管理员 --> 管理随访记录
+管理员 --> 管理在线销售
+管理员 --> 管理线下销售
+用户 --> 线上购买
+用户 --> 查看订单
+药品详情 --> 药品基础表 : 查看药品基础信息
+药品详情 --> 药品品牌表 : 查看药品品牌信息
+药品详情 --> 药品品类表 : 查看药品品类信息
+仓库批次 --> 药品详情 : 查看药品详情
+随访记录 --> 随访项 : 包含
+@enduml

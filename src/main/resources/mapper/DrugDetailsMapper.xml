@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.DrugDetailsMapper">
+
+    <select id="selectMyPage" resultType="com.yw.msmp.dto.DrugDetailsDTO">
+        select sdd.drug_detail_id,
+               sdd.drug_details_status,
+               sdd.drug_specification,
+               sdd.drug_number,
+               sdd.drug_unit_price,
+               sdd.drug_retail_price,
+               sdd.create_time,
+               sdd.modified_time,
+               sdd.drug_detail_path,
+               sd.drug_id,
+               sd.drug_name,
+               sd.is_rx,
+               sb.brand_id,
+               sb.brand_name,
+               tt.type_id,
+               tt.type_name
+        from sys_drug_details sdd
+                 left join sys_drug sd on sdd.drug_id = sd.drug_id
+                 left join sys_brand sb on sdd.brand_id = sb.brand_id
+                 left join tb_type tt on sd.type_id = tt.type_id
+    </select>
+
+    <select id="selectDrugVoList" resultType="com.yw.msmp.dto.DrugVo">
+        select sdd.drug_detail_id,
+               sdd.drug_unit_price,
+               sdd.drug_retail_price,
+               sdd.drug_specification,
+               sd.drug_id,
+               sd.drug_name,
+               sb.brand_id,
+               sb.brand_name
+        from sys_drug_details sdd
+                 left join sys_drug sd on sdd.drug_id = sd.drug_id
+                 left join sys_brand sb on sdd.brand_id = sb.brand_id
+        where sdd.drug_details_status = 1
+    </select>
+
+    <select id="selectOnlineDrugSearchPage" resultType="com.yw.msmp.dto.DrugDetailsDTO">
+        select sdd.drug_detail_id,
+        sdd.drug_id,
+        sdd.brand_id,
+        sdd.drug_details_status,
+        sdd.drug_specification,
+        sdd.drug_unit_price,
+        sdd.drug_retail_price,
+        sdd.create_time,
+        sdd.modified_time,
+        sdd.drug_number,
+        sdd.drug_detail_path,
+        sd.drug_id,
+        sd.drug_name,
+        sd.is_rx,
+        sd.type_id,
+        sb.brand_name,
+        tt.type_name,
+        ssb2.num
+        from sys_drug_details sdd
+        right join
+        (select ssb.drug_detail_id, sum(ssb.drug_detail_id) as num
+        from sys_store_batch ssb
+        <where>
+            <if test="storeId!=null">
+                and ssb.store_id=#{storeId}
+            </if>
+        </where>
+        group by ssb.drug_detail_id) as ssb2
+        on sdd.drug_detail_id = ssb2.drug_detail_id
+        inner join sys_drug sd on sdd.drug_id = sd.drug_id
+        left join sys_brand sb on sdd.brand_id = sb.brand_id
+        left join tb_type tt on sd.type_id = tt.type_id
+        <where>
+            <if test="drugSearchDTO.typeId!=null">
+                and sd.type_id = #{drugSearchDTO.typeId}
+            </if>
+            <if test="drugSearchDTO.searchMethod=='药品名称'">
+                and sd.drug_name like CONCAT('%',#{drugSearchDTO.searchText},'%')
+            </if>
+            <if test="drugSearchDTO.searchMethod=='药品编号'">
+                and sdd.drug_number = #{drugSearchDTO.searchText}
+            </if>
+        </where>
+    </select>
+</mapper>

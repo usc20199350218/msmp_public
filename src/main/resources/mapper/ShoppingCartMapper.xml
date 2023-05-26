@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.ShoppingCartMapper">
+
+    <select id="selectUserCart" resultType="com.yw.msmp.vo.ScDrugVO">
+
+    </select>
+    <select id="search" resultType="com.yw.msmp.vo.ScDrugVO">
+        SELECT tsc.cart_id,
+        tsc.drug_detail_id,
+        tsc.number,
+        tsc.store_id,
+        sdd.drug_specification,
+        sdd.drug_detail_path,
+        sdd.drug_retail_price,
+        sd.drug_id,
+        sd.drug_name
+        FROM tb_shopping_cart tsc
+        LEFT JOIN sys_drug_details sdd ON tsc.drug_detail_id = sdd.drug_detail_id
+        LEFT JOIN sys_drug sd ON sdd.drug_id = sd.drug_id
+        <where>
+            <if test="userId != null">AND tsc.user_id=#{userId}</if>
+            <if test="storeId != null">AND tsc.store_id=#{storeId}</if>
+            <if test="searchMethod=='药品名称' and searchText != null">
+                AND sd.drug_name like CONCAT('%',#{searchText},'%')
+            </if>
+            <if test="searchMethod=='药品编号' and searchText != null ">
+                AND sdd.drug_number = #{searchText}
+            </if>
+        </where>
+    </select>
+    <select id="getUserNumber" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select sum(tsc.number)
+        from tb_shopping_cart tsc
+        where tsc.user_id = #{userId}
+    </select>
+</mapper>

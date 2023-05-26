@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.DeliveryMapper">
+
+    <!--    <select id="selectByUserIdStatus" resultType="com.yw.msmp.vo.DeliveryVO">-->
+    <!--        select td.delivery_id,-->
+    <!--        td.delivery_status,-->
+    <!--        td.delivery_num,-->
+    <!--        td.user_id,-->
+    <!--        td.create_time,-->
+    <!--        td.modified_time,-->
+    <!--        ts.store_id,-->
+    <!--        ts.store_name,-->
+    <!--        ts.store_address,-->
+    <!--        ts.contact_phone,-->
+    <!--        ts.business_hours,-->
+    <!--        ts.create_time,-->
+    <!--        ts.area,-->
+    <!--        ts.business_district,-->
+    <!--        sdd.d@Repository@rug_detail_id,-->
+    <!--        sdd.drug_specification,-->
+    <!--        sd.drug_id,-->
+    <!--        sd.drug_name,-->
+    <!--        sd.is_rx,-->
+    <!--        sb.batch_id,-->
+    <!--        sb.batch_number,-->
+    <!--        sb.batch_production_date,-->
+    <!--        sb.batch_validity_period,-->
+    <!--        s.brand_id,-->
+    <!--        s.brand_name-->
+    <!--        from tb_delivery td-->
+    <!--        left join tb_store ts on ts.store_id = td.store_id-->
+    <!--        left join sys_drug_details sdd on td.drug_detail_id = sdd.drug_detail_id-->
+    <!--        left join sys_drug sd on sdd.drug_id = sd.drug_id-->
+    <!--        left join sys_batch sb on td.batch_id = sb.batch_id-->
+    <!--        left join sys_brand s on sdd.brand_id = s.brand_id-->
+    <!--        <where>-->
+    <!--            <if test="userId!='' and userId!=null ">td.user_id = #{userId}</if>-->
+    <!--            and td.delivery_status=#{deliveryStatus}-->
+    <!--        </where>-->
+
+    <!--    </select>-->
+    <select id="selectByUserIdStatus" resultType="com.yw.msmp.vo.DeliveryVO">
+        select td.delivery_id,
+        td.delivery_status,
+        td.delivery_num,
+        td.user_id,
+        td.create_time,
+        td.modified_time,
+        ts.store_id,
+        ts.store_name,
+        ts.store_address,
+        ts.contact_phone,
+        ts.business_hours,
+        ts.create_time,
+        ts.area,
+        ts.business_district,
+        sdd.drug_detail_id,
+        sdd.drug_specification,
+        sd.drug_id,
+        sd.drug_name,
+        sd.is_rx,
+        sb.batch_id,
+        sb.batch_number,
+        sb.batch_production_date,
+        sb.batch_validity_period,
+        s.brand_id,
+        s.brand_name
+        from tb_delivery td
+        left join tb_store ts on ts.store_id = td.store_id
+        left join sys_drug_details sdd on td.drug_detail_id = sdd.drug_detail_id
+        left join sys_drug sd on sdd.drug_id = sd.drug_id
+        left join sys_batch sb on td.batch_id = sb.batch_id
+        left join sys_brand s on sdd.brand_id = s.brand_id
+        <where>
+            <if test=" userId != '' and userId != null ">
+                td.user_id = #{userId}
+            </if>
+            <if test="true">
+                and td.delivery_status=#{deliveryStatus}
+            </if>
+        </where>
+    </select>
+</mapper>

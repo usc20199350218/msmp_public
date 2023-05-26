@@ -1,0 +1,49 @@
+@startuml
+left to right direction
+skinparam packageStyle rect
+actor Admin
+actor User
+
+rectangle PharmacySystem {
+  usecase "管理菜单" as UC1
+  usecase "管理人员" as UC2
+  usecase "管理角色" as UC3
+  usecase "管理药品品牌" as UC4
+  usecase "管理药品基础资料" as UC5
+  usecase "管理药品详情" as UC6
+  usecase "管理药品品类" as UC7
+  usecase "管理仓库批次" as UC8
+  usecase "管理店铺列表" as UC9
+  usecase "管理店铺职员" as UC10
+  usecase "管理店铺职位" as UC11
+  usecase "管理店铺批次" as UC12
+  usecase "管理订单" as UC13
+  usecase "管理随访项" as UC14
+  usecase "管理随访记录" as UC15
+  usecase "管理线上销售" as UC16
+  usecase "管理线下销售" as UC17
+  usecase "线上购买" as UC18
+  usecase "查看自己的订单" as UC19
+
+  Admin --> UC1
+  Admin --> UC2
+  Admin --> UC3
+  Admin --> UC4
+  Admin --> UC5
+  Admin --> UC6
+  Admin --> UC7
+  Admin --> UC8
+  Admin --> UC9
+  Admin --> UC10
+  Admin --> UC11
+  Admin --> UC12
+  Admin --> UC13
+  Admin --> UC14
+  Admin --> UC15
+  Admin --> UC16
+  Admin --> UC17
+
+  User --> UC18
+  User --> UC19
+}
+@enduml

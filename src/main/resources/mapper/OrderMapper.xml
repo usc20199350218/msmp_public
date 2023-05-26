@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.OrderMapper">
+
+    <select id="selectByUser" resultType="com.yw.msmp.entity.StoreEntity" parameterType="java.lang.Integer">
+        select *
+        from tb_store ts
+        where ts.store_id in
+              (select distinct t.store_id
+               from tb_order t
+               where t.user_id = #{userId})
+    </select>
+    <select id="searchOrder" resultType="com.yw.msmp.entity.OrderEntity">
+        SELECT t.*
+        FROM tb_order t
+        JOIN tb_order_detail tod ON t.order_id = tod.order_id
+        JOIN sys_drug_details sdd ON tod.drug_detail_id = sdd.drug_detail_id
+        JOIN sys_drug sd ON sdd.drug_id = sd.drug_id
+        <where>
+            <if test="userId != null">
+                AND t.user_id = #{userId}
+            </if>
+            <if test="storeId != null">
+                AND t.store_id = #{storeId}
+            </if>
+            <if test="orderType != null">
+                AND t.order_type = #{orderType}
+            </if>
+            <if test="payStatus != null">
+                AND t.status =#{payStatus}
+            </if>
+            <if test="payment != null">
+                AND t.payment_method = #{payment}
+            </if>
+            <if test="searchMethod == '药品名称' and searchText != ''">
+                AND sdd.drug_number = #{searchText}
+            </if>
+            <if test="searchMethod == '药品编码' and searchText != ''">
+                AND sd.drug_name LIKE CONCAT('%', #{searchText}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="searchOrderPage" resultType="com.yw.msmp.entity.OrderEntity">
+        <!--        SELECT t.*-->
+        <!--        FROM tb_order t-->
+        <!--        LEFT JOIN tb_order_detail tod ON t.order_id = tod.order_id-->
+        <!--        LEFT JOIN sys_drug_details sdd ON tod.drug_detail_id = sdd.drug_detail_id-->
+        <!--        LEFT JOIN sys_drug sd ON sdd.drug_id = sd.drug_id-->
+        <!--        <where>-->
+        <!--            <if test="userId != 0">-->
+        <!--                AND t.user_id = #{userId}-->
+        <!--            </if>-->
+        <!--            <if test="storeId != null">-->
+        <!--                AND t.store_id = #{storeId}-->
+        <!--            </if>-->
+        <!--            <if test="orderType != null">-->
+        <!--                AND t.order_type = #{orderType}-->
+        <!--            </if>-->
+        <!--            <if test="payStatus != null">-->
+        <!--                AND t.status =#{payStatus}-->
+        <!--            </if>-->
+        <!--            <if test="payment != null">-->
+        <!--                AND t.payment_method = #{payment}-->
+        <!--            </if>-->
+        <!--            <if test="startDate != null">-->
+        <!--                AND t.create_time &gt;= #{startDate}-->
+        <!--            </if>-->
+        <!--            <if test="endDate != null">-->
+        <!--                AND t.create_time &lt;= #{endDate}-->
+        <!--            </if>-->
+        <!--            <if test="searchMethod == '药品名称' and searchText != ''">-->
+        <!--                AND sdd.drug_number = #{searchText}-->
+        <!--            </if>-->
+        <!--            <if test="searchMethod == '药品编号' and searchText != ''">-->
+        <!--                AND sd.drug_name LIKE CONCAT('%', #{searchText}, '%')-->
+        <!--            </if>-->
+        <!--            <if test="searchMethod == '订单编号' and searchText != ''">-->
+        <!--                AND t.order_num= #{searchText}-->
+        <!--            </if>-->
+        <!--        </where>-->
+
+
+        SELECT t.*
+        FROM tb_order t
+        <where>
+            <if test="userId != 0">
+                AND t.user_id = #{userId}
+            </if>
+            <if test="storeId != null">
+                AND t.store_id = #{storeId}
+            </if>
+            <if test="orderType != null">
+                AND t.order_type = #{orderType}
+            </if>
+            <if test="payStatus != null">
+                AND t.status = #{payStatus}
+            </if>
+            <if test="payment != null">
+                AND t.payment_method = #{payment}
+            </if>
+            <if test="startDate != null">
+                AND t.create_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND t.create_time &lt;= #{endDate}
+            </if>
+            <if test="searchMethod == '订单编号' and searchText != '' ">
+                AND t.order_num = #{searchText}
+            </if>
+            <if test="searchMethod == '药品编号' and searchText != '' ">
+                AND t.order_id IN (
+                SELECT DISTINCT order_id
+                FROM tb_order_detail tod
+                LEFT JOIN sys_drug_details sdd ON tod.drug_detail_id = sdd.drug_detail_id
+                WHERE sdd.drug_number = #{searchText}
+                )
+            </if>
+            <if test="searchMethod == '药品名称' and searchText != '' ">
+                AND t.order_id IN (
+                SELECT DISTINCT order_id
+                FROM tb_order_detail tod
+                LEFT JOIN sys_drug_details sdd ON tod.drug_detail_id = sdd.drug_detail_id
+                WHERE tod.drug_name LIKE CONCAT('%', #{searchText}, '%')
+                )
+            </if>
+        </where>
+    </select>
+</mapper>

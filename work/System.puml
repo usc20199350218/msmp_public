@@ -1,0 +1,59 @@
+@startuml
+left to right direction
+
+actor 管理员 as admin
+actor 用户 as user
+
+rectangle 管理员功能 {
+  usecase 菜单权限管理
+  usecase 人员管理
+  usecase 角色管理
+  usecase 药品信息管理
+  usecase 仓库管理
+  usecase 店铺管理
+}
+
+rectangle 用户购买功能 {
+  usecase 在线浏览药品
+  usecase 在线购买药品
+  usecase 订单管理
+  usecase 查询订单
+}
+
+rectangle 店内管理 {
+  usecase 店内职位管理
+  usecase 店铺批次管理
+}
+
+rectangle 线下销售 {
+  usecase 线下售药
+  usecase 线下订单
+}
+
+rectangle 线下订单 {
+  usecase 查看订单
+  usecase 取消订单
+}
+
+admin --> 菜单权限管理
+admin --> 人员管理
+admin --> 角色管理
+admin --> 药品信息管理
+admin --> 仓库管理
+admin --> 店铺管理
+
+user --> 在线浏览药品
+user --> 在线购买药品
+user --> 订单管理
+user --> 查询订单
+
+店内管理 --> 店内职位管理
+店内管理 --> 店铺批次管理
+
+线下销售 --> 线下售药
+线下销售 --> 线下退药
+
+线下订单 --> 查看订单
+线下订单 --> 取消订单
+
+@enduml

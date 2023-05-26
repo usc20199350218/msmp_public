@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.StaffMapper">
+
+    <select id="selectMyPage" resultType="com.yw.msmp.dto.StaffDTO">
+        select ts.staff_id,
+        ts.status,
+        ts.actual_salary,
+        ts.create_time,
+        ts.modified_time,
+        sub.user_id,
+        sub.user_name,
+        sub.user_phone,
+        sub.user_real_name,
+        sub.user_gender,
+        sub.role_id,
+        tp.position_id,
+        tp.position_name,
+        t.store_id,
+        t.store_name
+        from tb_staff ts
+        left join sys_user_basis sub on ts.user_id = sub.user_id
+        left join tb_position tp on ts.position_id = tp.position_id
+        left join tb_store t on ts.store_id = t.store_id
+        <where>
+            <if test="storeId!=null and storeId != ''">
+                t.store_id=#{storeId}
+            </if>
+            <if test="positionId!=null and positionId != ''">
+                and tp.position_id=#{positionId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getStaff" resultType="com.yw.msmp.vo.StaffVO">
+        select ts.staff_id,
+        ts.store_id,
+        ts.user_id,
+        ts.position_id,
+        ts.status,
+        ts.actual_salary,
+        sub.user_name,
+        sub.user_phone,
+        sub.user_real_name,
+        sub.user_gender,
+        sub.user_avatar_url,
+        sub.user_nick_name,
+        tp.position_name
+        from tb_staff ts
+        left outer join sys_user_basis sub on ts.user_id = sub.user_id
+        left join tb_position tp on ts.position_id = tp.position_id
+        where ts.store_id = #{storeId}
+        <if test="positionName=='店长'">
+            and tp.position_name = '店长'
+        </if>
+        <if test="positionName=='店员'">
+            and tp.position_name != '店长'
+            and tp.position_name != ''
+        </if>
+    </select>
+</mapper>
+

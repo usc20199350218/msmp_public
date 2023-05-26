@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.UserBasisMapper">
+
+    <select id="selectMyPage" resultType="com.yw.msmp.dto.UserDTO">
+        select *
+        from sys_user_basis tu
+                 left join sys_role tr on tu.role_id = tr.role_id
+    </select>
+    <select id="selectVOPage" resultType="com.yw.msmp.vo.SelectVO">
+        SELECT * FROM sys_user_basis
+        <where>
+            <choose>
+                <when test="searchType == 'realName'">
+                    <bind name="userRealName" value="'%' + searchText + '%'"/>
+                    <if test="searchText != null and searchText != ''">
+                        AND user_real_name like #{userRealName}
+                    </if>
+                </when>
+                <when test="searchType == 'userPhone'">
+                    <bind name="userPhone" value="'%' + searchText + '%'"/>
+                    <if test="searchText != null and searchText != ''">
+                        AND user_phone = #{userPhone}
+                    </if>
+                </when>
+            </choose>
+        </where>
+    </select>
+    <select id="searchPage" resultType="com.yw.msmp.dto.UserDTO">
+        select *
+        from sys_user_basis tu
+        left join sys_role tr on tu.role_id = tr.role_id
+        <where>
+            <if test="searchUserDTO.userGender!='男女'">
+                AND tu.user_gender = #{searchUserDTO.userGender}
+            </if>
+            <if test="searchUserDTO.userStatus!=null">
+                AND tu.user_status = #{searchUserDTO.userStatus}
+            </if>
+            <if test="searchUserDTO.userVip!=null">
+                and tu.user_vip = #{searchUserDTO.userVip}
+            </if>
+            <if test="searchUserDTO.roleId!=null">
+                and tu.role_id =#{searchUserDTO.roleId}
+            </if>
+            <if test="searchUserDTO.searchMethod=='userName' and searchUserDTO.searchText !=null and searchUserDTO.searchText != ''">
+                and tu.user_name like CONCAT('%',#{searchUserDTO.searchText},'%')
+            </if>
+            <if test="searchUserDTO.searchMethod=='userPhone' and searchUserDTO.searchText !=null and searchUserDTO.searchText != ''">
+                and tu.user_phone = #{searchUserDTO.searchText}
+            </if>
+            <if test="searchUserDTO.searchMethod=='userRealName' and searchUserDTO.searchText !=null and searchUserDTO.searchText != ''">
+                and tu.user_real_name like CONCAT('%',#{searchUserDTO.searchText},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>
+

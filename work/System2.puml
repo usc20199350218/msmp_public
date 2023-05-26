@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+actor 管理员
+actor 工作人员
+actor 用户
+rectangle 系统 {
+  usecase 管理菜单
+  usecase 管理角色
+  usecase 管理用户
+  usecase 管理药品品牌
+  usecase 管理药品分类
+  usecase 管理药品
+  usecase 管理药品详情
+  usecase 管理仓库批次
+  usecase 管理店铺列表
+  usecase 管理店铺职位
+  usecase 管理店铺职员
+  usecase 管理店铺批次
+  usecase 管理店铺订单
+  usecase 管理随访项
+  usecase 管理随访记录
+  usecase 线下销售
+  usecase 在线销售
+  管理员 --> 管理菜单
+  管理员 --> 管理角色
+  管理员 --> 管理用户
+  管理员 --> 管理药品品牌
+  管理员 --> 管理药品分类
+  管理员 --> 管理药品
+  管理员 --> 管理药品详情
+  管理员 --> 管理仓库批次
+  管理员 --> 管理店铺列表
+  管理员 --> 管理店铺职位
+  管理员 --> 管理店铺职员
+  管理员 --> 管理店铺批次
+  管理员 --> 管理店铺订单
+  管理员 --> 管理随访项
+  管理员 --> 管理随访记录
+  工作人员 --> 线下销售
+  用户 --> 在线销售
+}
+@enduml

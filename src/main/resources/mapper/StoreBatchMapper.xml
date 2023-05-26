@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.StoreBatchMapper">
+
+    <select id="selectMyPage" resultType="com.yw.msmp.vo.StoreBatchVO">
+        select sum(case
+                       when ssb.store_batch_status = 'CREATED' then ssb.store_batch_purchase_quantity
+                       else 0 end) as total_created,
+               sum(case
+                       when ssb.store_batch_status = 'NORMAL_PURCHASE' then ssb.store_batch_purchase_quantity
+                       else 0 end) as total_normal_purchase,
+               sum(case
+                       when ssb.store_batch_status = 'SOLD' then ssb.store_batch_existing_quantity
+                       else 0 end) as total_sold,
+               sum(case
+                       when ssb.store_batch_status = 'EXPIRED' then ssb.store_batch_existing_quantity
+                       else 0 end) as total_expired,
+               sum(case
+                       when ssb.store_batch_status = 'FORBIDDEN' then ssb.store_batch_existing_quantity
+                       else 0 end) as total_normal_forbidden,
+               sum(case
+                       when ssb.store_batch_status != 'CREATED' then ssb.store_batch_existing_quantity
+                       else 0 end) as total_all,
+               sdd.drug_detail_id,
+               sdd.drug_specification,
+               sdd.drug_unit_price,
+               sdd.drug_retail_price,
+               sd.drug_id,
+               sd.drug_name,
+               sd.is_rx,
+               sb.brand_id,
+               sb.brand_name,
+               sb.user_id
+        from sys_store_batch ssb
+                 left join sys_drug_details sdd on ssb.drug_detail_id = sdd.drug_detail_id
+                 left join sys_drug sd on sdd.drug_id = sd.drug_id
+                 left join sys_brand sb on sdd.brand_id = sb.brand_id
+        where ssb.store_id = #{storeId}
+        group by ssb.drug_detail_id
+
+    </select>
+
+    <select id="selectDetailList" resultType="com.yw.msmp.vo.StoreBatchDetailVO">
+        select ssb.store_batch_id,
+               ssb.batch_id,
+               ssb.drug_detail_id,
+               ssb.batch_number,
+               ssb.store_batch_purchase_quantity,
+               COALESCE(ssb.store_batch_existing_quantity, 0) as store_batch_existing_quantity,
+               ssb.store_batch_status,
+               ssb.version,
+               ssb.create_time,
+               ssb.modified_time,
+               ssb.store_batch_remark,
+               sb.batch_production_date,
+               sb.batch_validity_period
+        from sys_store_batch ssb
+                 left join sys_batch sb on ssb.batch_id = sb.batch_id
+        where ssb.drug_detail_id = #{drugDetailId}
+          and ssb.store_batch_status = #{active}
+          and ssb.store_id = #{storeId}
+    </select>
+    <select id="selectApplyBatchVoList" resultType="com.yw.msmp.vo.ApplyBatchVo"
+            parameterType="java.lang.Integer">
+        select s1.drug_detail_id,
+               COALESCE(s1.total_created, 0)                   as total_created,
+               COALESCE(s2.total_sold, 0)                      as total_sold,
+               (COALESCE(s2.total_sold, 0) - s1.total_created) as total_balance,
+               sd.drug_id,
+               sd.drug_name,
+               sdd.drug_specification,
+               sd.is_rx,
+               s.brand_id,
+               s.brand_name,
+               tt.type_id,
+               tt.type_name
+        from (SELECT ssb.drug_detail_id,
+                     SUM(IF(ssb.store_batch_status = 'CREATED', ssb.store_batch_purchase_quantity, 0)) AS total_created
+              FROM sys_store_batch ssb
+              WHERE ssb.store_batch_status = 'CREATED'
+                and ssb.store_id = #{storeId}
+              GROUP BY ssb.drug_detail_id) s1
+                 left join
+             (SELECT sb.drug_detail_id,
+                     SUM(IF(sb.batch_status = 'SOLD', sb.batch_existing_quantity, 0)) AS total_sold
+              FROM sys_batch sb
+              WHERE sb.batch_status = 'SOLD'
+              GROUP BY sb.drug_detail_id) s2 on s1.drug_detail_id = s2.drug_detail_id
+                 left join sys_drug_details sdd on sdd.drug_detail_id = s1.drug_detail_id
+                 left join sys_drug sd on sdd.drug_id = sd.drug_id
+                 left join sys_brand s on sdd.brand_id = s.brand_id
+                 left join tb_type tt on sd.type_id = tt.type_id;
+    </select>
+    <select id="selectCheckList" resultType="com.yw.msmp.dto.CheckGetBatchDTO">
+        SELECT distinct ssb.drug_detail_id,
+                        ssb.store_batch_id,
+                        ssb.store_batch_purchase_quantity
+        FROM sys_store_batch ssb
+        WHERE ssb.store_batch_status = 'CREATED'
+          AND ssb.store_id = #{storeId}
+    </select>
+    <select id="selectByStoreIdDDId" resultType="com.yw.msmp.vo.ApplyBatchVo">
+        select s1.store_batch_id,
+               s1.drug_detail_id,
+               COALESCE(s1.total_created, 0)                   as total_created,
+               COALESCE(s2.total_sold, 0)                      as total_sold,
+               (COALESCE(s2.total_sold, 0) - s1.total_created) as total_balance,
+               sd.drug_id,
+               sd.drug_name,
+               sdd.drug_specification,
+               sd.is_rx,
+               s.brand_id,
+               s.brand_name,
+               tt.type_id,
+               tt.type_name
+        from (SELECT ssb.store_batch_id,
+                     ssb.drug_detail_id,
+                     ssb.store_batch_purchase_quantity as total_created
+              FROM sys_store_batch ssb
+              WHERE ssb.store_batch_status = 'CREATED'
+                and ssb.store_id = #{storeId}
+                and ssb.drug_detail_id = #{drugDetailId}) s1
+                 left join
+             (SELECT sb.drug_detail_id,
+                     SUM(IF(sb.batch_status = 'SOLD', sb.batch_existing_quantity, 0)) AS total_sold
+              FROM sys_batch sb
+              WHERE sb.batch_status = 'SOLD'
+              GROUP BY sb.drug_detail_id) s2 on s1.drug_detail_id = s2.drug_detail_id
+                 left join sys_drug_details sdd on sdd.drug_detail_id = s1.drug_detail_id
+                 left join sys_drug sd on sdd.drug_id = sd.drug_id
+                 left join sys_brand s on sdd.brand_id = s.brand_id
+                 left join tb_type tt on sd.type_id = tt.type_id
+    </select>
+    <select id="selectOfflineByName" resultType="com.yw.msmp.vo.OfflineSaleVO">
+        select ssb.store_batch_id,
+        ssb.store_batch_existing_quantity,
+        sb.batch_id,
+        sb.batch_number,
+        sb.batch_production_date,
+        sdd.drug_detail_id,
+        sdd.create_time,
+        sdd.drug_specification,
+        sdd.drug_retail_price,
+        sd.drug_id,
+        sd.drug_name,
+        sd.is_rx,
+        s.brand_id,
+        s.brand_name
+        from sys_store_batch ssb
+        left join sys_batch sb on ssb.batch_id = sb.batch_id
+        left join sys_drug_details sdd on ssb.drug_detail_id = sdd.drug_detail_id
+        left join sys_drug sd on sdd.drug_id = sd.drug_id
+        left join sys_brand s on sdd.brand_id = s.brand_id
+        where ssb.store_batch_status = 'SOLD'
+        and ssb.store_id = #{storeId}
+        <if test="input!=null and input != ''">
+            and sd.drug_name like concat('%', #{input}, '%')
+        </if>
+    </select>
+    <select id="selectOfflineByNumber" resultType="com.yw.msmp.vo.OfflineSaleVO">
+        select ssb.store_batch_id,
+        ssb.store_batch_existing_quantity,
+        sb.batch_id,
+        sb.batch_number,
+        sb.batch_production_date,
+        sdd.drug_detail_id,
+        sdd.create_time,
+        sdd.drug_specification,
+        sdd.drug_retail_price,
+        sd.drug_id,
+        sd.drug_name,
+        sd.is_rx,
+        s.brand_id,
+        s.brand_name
+        from sys_store_batch ssb
+        left join sys_batch sb on ssb.batch_id = sb.batch_id
+        left join sys_drug_details sdd on ssb.drug_detail_id = sdd.drug_detail_id
+        left join sys_drug sd on sdd.drug_id = sd.drug_id
+        left join sys_brand s on sdd.brand_id = s.brand_id
+        where ssb.store_batch_status = 'SOLD'
+        and ssb.store_id = #{storeId}
+        <if test="input!=null and input != ''">
+            and sdd.drug_number like concat('%', #{input}, '%')
+        </if>
+    </select>
+    <select id="selectSum" resultType="integer">
+        select sum(ssb.store_batch_existing_quantity)
+        from sys_store_batch ssb
+        where ssb.store_id = #{storeId}
+          and ssb.drug_detail_id = #{drugDetailId}
+          and ssb.store_batch_status = #{batchStatusEnum}
+        group by ssb.drug_detail_id
+    </select>
+    <select id="getDetailNum" resultType="java.lang.Integer">
+        select sum(ssb.store_batch_existing_quantity)
+        from sys_store_batch ssb
+        where ssb.store_batch_status = 'SOLD'
+          and ssb.store_id = #{storeId}
+          and ssb.drug_detail_id = #{drugDetailId}
+    </select>
+    <select id="getExpired" resultType="com.yw.msmp.entity.StoreBatchEntity">
+        select ssb.*
+        from sys_store_batch ssb
+        left join sys_batch sb on ssb.batch_id = sb.batch_id
+        WHERE DATE_ADD(sb.batch_production_date, INTERVAL sb.batch_validity_period MONTH) &lt; CURDATE()
+    </select>
+</mapper>

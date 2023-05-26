@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yw.msmp.mapper.BatchMapper">
+    <select id="selectMyPage" resultType="com.yw.msmp.dto.BatchDTO">
+        select sdd.drug_detail_id,
+               sdd.drug_specification,
+               sdd.drug_unit_price,
+               sdd.drug_retail_price,
+               sd.drug_id,
+               sd.drug_name,
+               sd.is_rx,
+               s.total_created,
+               s.total_sold,
+               s.total_normal_purchase,
+               s.total_normal_forbidden,
+               s.total_all,
+               b.brand_id,
+               b.brand_name
+        from medical.sys_drug_details sdd
+                 left join medical.sys_drug sd on sdd.drug_id = sd.drug_id
+                 inner join (select sb.drug_detail_id,
+                                    sum(case
+                                            when sb.batch_status = 'CREATED' then sb.batch_existing_quantity
+                                            else 0 end) as total_created,
+                                    sum(case
+                                            when sb.batch_status = 'SOLD' then sb.batch_existing_quantity
+                                            else 0 end) as total_sold,
+                                    sum(case
+                                            when sb.batch_status = 'NORMAL_PURCHASE' then sb.batch_existing_quantity
+                                            else 0 end) as total_normal_purchase,
+                                    sum(case
+                                            when sb.batch_status = 'FORBIDDEN' then sb.batch_existing_quantity
+                                            else 0 end) as total_normal_forbidden,
+                                    sum(case
+                                            when sb.batch_status != 'CREATED' then sb.batch_existing_quantity
+                                            else 0 end) as total_all
+                             from medical.sys_batch sb
+                             where sb.batch_status in ('CREATED', 'SOLD', 'NORMAL_PURCHASE', 'FORBIDDEN')
+                             group by drug_detail_id) s on sdd.drug_detail_id = s.drug_detail_id
+                 left join medical.sys_brand b on sdd.brand_id = b.brand_id
+
+    </select>
+
+    <select id="searchPage" resultType="com.yw.msmp.dto.BatchDTO">
+        select sdd.drug_detail_id,
+        sdd.drug_specification,
+        sdd.drug_unit_price,
+        sdd.drug_retail_price,
+        sd.drug_id,
+        sd.drug_name,
+        sd.is_rx,
+        s.total_created,
+        s.total_sold,
+        s.total_normal_purchase,
+        s.total_normal_forbidden,
+        s.total_all,
+        b.brand_id,
+        b.brand_name
+        from sys_drug_details sdd
+        left join sys_drug sd on sdd.drug_id = sd.drug_id
+        inner join (select sb.drug_detail_id,
+        sum(IF(sb.batch_status = 'CREATED', sb.batch_existing_quantity, 0)) as total_created,
+        sum(IF(sb.batch_status = 'SOLD', sb.batch_existing_quantity, 0)) as total_sold,
+        sum(IF(sb.batch_status = 'NORMAL_PURCHASE', sb.batch_existing_quantity,
+        0)) as total_normal_purchase,
+        sum(IF(sb.batch_status = 'FORBIDDEN', sb.batch_existing_quantity, 0)) as total_normal_forbidden,
+        sum(IF(sb.batch_status != 'CREATED', sb.batch_existing_quantity, 0)) as total_all
+        from sys_batch sb
+        where sb.batch_status in ('CREATED', 'SOLD', 'NORMAL_PURCHASE', 'FORBIDDEN')
+        group by drug_detail_id) s on sdd.drug_detail_id = s.drug_detail_id
+        left join sys_brand b on sdd.brand_id = b.brand_id
+        left join tb_type tt on sd.type_id = tt.type_id
+        <where>
+            <if test="searchDrugDTO.brandId != null">
+                AND sdd.brand_id = #{searchDrugDTO.brandId}
+            </if>
+            <if test="searchDrugDTO.isRx!= null">
+                AND sd.is_rx = #{searchDrugDTO.isRx}
+            </if>
+            <if test="searchDrugDTO.typeId!= null">
+                AND sd.type_id = #{searchDrugDTO.typeId}
+            </if>
+            <if test="searchDrugDTO.searchMethod == 'drugName' and searchDrugDTO.searchText != ''">
+                AND sd.drug_name like CONCAT('%',#{searchDrugDTO.searchText},'%')
+            </if>
+            <if test="searchDrugDTO.searchMethod == 'drugDetailId' and searchDrugDTO.searchText != null">
+                AND sdd.drug_detail_id like CONCAT('%',#{searchDrugDTO.searchText},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getExpired" resultType="com.yw.msmp.entity.BatchEntity">
+        select *
+        from sys_batch sb
+        WHERE DATE_ADD(sb.batch_production_date, INTERVAL sb.batch_validity_period MONTH) &lt; CURDATE()
+          AND sb.batch_status = 'SOLD'
+    </select>
+</mapper>

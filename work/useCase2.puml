@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+actor User
+actor Admin
+rectangle OnlineShopping {
+  User --> (Browse products)
+  User --> (Add to cart)
+  User --> (Checkout)
+  User --> (Pay)
+  (Browse products) --> (View product details)
+  (Browse products) --> (Search products)
+  (Add to cart) --> (Update cart)
+  (Checkout) --> (View order details)
+  (Checkout) --> (Place order)
+  (Pay) --> (Process payment)
+  (Process payment) --> (Update order status)
+  Admin --> (Manage products)
+  Admin --> (Manage orders)
+  Admin --> (Manage users)
+  (Manage products) --> (Add product)
+  (Manage products) --> (Update product)
+  (Manage products) --> (Delete product)
+  (Manage products) --> (View product details)
+  (Manage orders) --> (View order details)
+  (Manage orders) --> (Update order status)
+  (Manage users) --> (Add user)
+  (Manage users) --> (Update user)
+  (Manage users) --> (Delete user)
+  (Manage users) --> (View user details)
+}
+@enduml

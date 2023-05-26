@@ -1,0 +1,30 @@
+@startuml
+title 调货流程（修正版）
+
+|店铺|
+start
+: 新建店铺批次;
+|仓库|
+if (审核) then (no)
+  : 审核不同意;
+  : 重新提交申请;
+else (yes)
+  : 更新店铺批次状态为正常;
+  repeat
+    : 按从老批次到新批次的顺序调药品;
+    if (批次充足) then (yes)
+      : 生成配送信息;
+      |配送部分|
+      : 配送;
+    else (no)
+      : 拆分店铺批次;
+      : 多次申请;
+    endif
+  repeat while (所有药品都已分配完)
+  repeat
+         |店铺|
+        : 等待配送;
+         repeat while(配送达到)
+endif
+stop
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+left to right direction
+actor Administrator
+
+usecase "登录系统" as UC1
+usecase "管理菜单" as UC2
+usecase "管理角色" as UC3
+usecase "分配菜单给角色" as UC4
+
+Administrator --> UC1
+Administrator --> UC2
+Administrator --> UC3
+UC2 --> UC4
+UC3 --> UC4
+
+@enduml
